@@ -84,25 +84,30 @@ void netdev_init(void)
 	
 	bcxx_hard_reset();
 
-	nbiot_sleep(10000);
+	nbiot_sleep(5000);
 
 //	SendCmd("AT+NRB\r\n", "OK", 5000,0,10);
-//	SendCmd("AT+CGMR\r\n", "OK", 5000,0,10);
 	SendCmd("ATE0\r\n", "OK", 100,0,1);
-//	SendCmd("AT+CIMI\r\n", "OK", 1000,3,5);
+	SendCmd("AT+CFUN=0\r\n", "OK", 2000,0,5);
+	SendCmd("AT+NBAND=8\r\n", "OK", 100,0,1);
+	SendCmd("AT+NRB\r\n", "OK", 10000,0,10);
+	SendCmd("AT+CFUN=1\r\n", "OK", 100,0,5);
 	SendCmd("AT+CMEE=1\r\n","OK", 100,0,10);
 	SendCmd("AT+MIPLCONFIG=1,183.230.40.39,5683\r\n","OK",100,0,10);
 	SendCmd("AT+QREGSWT=2\r\n","OK",100,0,10);
 	SendCmd("AT+CSCON=1\r\n","OK", 100,0,10);
 	SendCmd("AT+CEREG=2\r\n","OK", 100,0,10);
-	SendCmd("AT+CGATT=1\r\n","OK", 100,0,10);
-	
 	SendCmd("AT+CEDRXS=0,5\r\n","OK", 100,0,5);
 	SendCmd("AT+CPSMS=0\r\n","OK", 100,0,5);
-//	SendCmd("AT+CSQ\r\n", "OK", 1000,0,5);
+	SendCmd("AT+CGATT=1\r\n","OK", 100,0,10);
+	SendCmd("AT+CSQ\r\n", "OK", 1000,0,5);
 	
 	nbiot_sleep(5000);
-	if(!SendCmd("AT+CEREG?\r\n","CEREG:2,1", 1000,10,5))
+//	if(!SendCmd("AT+CEREG?\r\n","CEREG:2,1", 1000,5,5))
+//	{
+//		goto RE_INIT;
+//	}
+	if(!SendCmd("AT+CGATT?\r\n","+CGATT:1", 1000,5,5))
 	{
 		goto RE_INIT;
 	}
@@ -166,13 +171,13 @@ size_t bcxx_register_request(uint8_t *buffer,size_t buffer_len)
 	size_t len = 0;
 	char status = 0;
 
-	len = strlen("AT+MIPLOPEN=0,1000,90\r\n") + 1;
+	len = strlen("AT+MIPLOPEN=0,200,90\r\n") + 1;
 
 	if(len < buffer_len)
 	{
-		memcpy(buffer,"AT+MIPLOPEN=0,1000,90\r\n",len);
+		memcpy(buffer,"AT+MIPLOPEN=0,200,90\r\n",len);
 
-		status=SendCmd("AT+MIPLOPEN=0,1000,90\r\n","OK",300,0,5);
+		status=SendCmd("AT+MIPLOPEN=0,200,90\r\n","OK",300,0,5);
 
 		if(status == 2)
 		{

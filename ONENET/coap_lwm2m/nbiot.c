@@ -637,6 +637,18 @@ static void handle_transaction(nbiot_device_t  *dev,
 				                      true,
 				                      dev->first_mid);
 		}
+		else if(strstr(tmp,",8\r\n") != NULL)
+		{
+			if(dev->state == STATE_REG_PENDING)
+			{
+				if(transaction)
+					nbiot_transaction_del(dev,
+					                      true,
+					                      dev->next_mid);
+			}
+			
+			dev->state = STATE_REG_FAILED;
+		}
 		else if(strstr(tmp,",11\r\n") != NULL)
 		{
 			if(dev->state == STATE_REG_UPDATE_PENDING)
@@ -651,10 +663,10 @@ static void handle_transaction(nbiot_device_t  *dev,
 		{
 			if(dev->state == STATE_REG_UPDATE_PENDING)
 			{
-				if(transaction)
-					nbiot_transaction_del(dev,
-					                      true,
-					                      dev->next_mid);
+//				if(transaction)
+//					nbiot_transaction_del(dev,
+//					                      true,
+//					                      dev->next_mid);
 			}
 			else
 			{
@@ -665,10 +677,10 @@ static void handle_transaction(nbiot_device_t  *dev,
 		{
 			if(dev->state == STATE_REG_UPDATE_PENDING)
 			{
-				if(transaction)
-					nbiot_transaction_del(dev,
-					                      true,
-					                      dev->next_mid);
+//				if(transaction)
+//					nbiot_transaction_del(dev,
+//					                      true,
+//					                      dev->next_mid);
 			}
 			else
 			{

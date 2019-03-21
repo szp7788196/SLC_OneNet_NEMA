@@ -20,7 +20,7 @@ int8_t dl_buf_id=-1;
 
 FIFO(dl_buf,8,512);
 
-#define UART_DMA 1
+//#define UART_DMA 1
 #define MAX_RCV_LEN 512
 #ifdef UART_DMA
 #include "stm32f10x.h"

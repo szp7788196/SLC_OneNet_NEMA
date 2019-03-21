@@ -108,6 +108,7 @@ int nbiot_register_update(nbiot_device_t  *dev,
 			                      registraction_update_reply);
 			
 //			SendCmd("AT+MIPLCLOSE=0\r\n","OK",300,0,5);//²âÊÔÓÃ
+//			dev->state = STATE_REG_FAILED;
 		}
 		else
 		{
@@ -169,7 +170,7 @@ void nbiot_register_step(nbiot_device_t *dev,
 
 	if (dev->state == STATE_REGISTERED)
 	{
-		next_update = next_update >> 2;
+		next_update = next_update;
 
 		if(dev->registraction + next_update <= now)
 		{

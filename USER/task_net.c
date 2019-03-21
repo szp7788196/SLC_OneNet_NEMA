@@ -35,19 +35,19 @@ nbiot_value_t in_put_power_p;			//有功功率 float		3328 0 5700
 nbiot_value_t in_put_power_q;			//无功功率 float		3328 1 5700
 nbiot_value_t in_put_power_s;			//视在功率 float		3328 2 5700
 nbiot_value_t in_put_energy_p;			//有功能量 float		3331 0 5805
-nbiot_value_t in_put_energy_q;			//无功能量 float		3331 0 5805
-nbiot_value_t in_put_energy_s;			//视在能量 float		3331 0 5805
+nbiot_value_t in_put_energy_q;			//无功能量 float		3331 1 5805
+nbiot_value_t in_put_energy_s;			//视在能量 float		3331 2 5805
 nbiot_value_t signal_intensity;			//信号强度 float		3330 0 5805
 
-nbiot_value_t light_control_switch;		//灯具控制 Boolean		3311 0 5850
+//nbiot_value_t light_control_switch;		//灯具控制 Boolean		3311 0 5850
 nbiot_value_t light_control_dimmer;		//灯具控制 Integer		3311 0 5851
-nbiot_value_t ota;						//在线升级 string		3308 0 5750
-nbiot_value_t reset;					//远程复位 string		3308 1 5750
-nbiot_value_t work_mode;				//工作模式 string		3308 2 5750
-nbiot_value_t time_strategy;			//时间策略 string		3308 3 5750
-nbiot_value_t data_upload_interval;		//上传间隔 float		3308 0 5900
-nbiot_value_t power_interface;			//电源接口 float		3308 1 5900
-
+nbiot_value_t device_uuid;				//设备UUID string		3308 0 5750
+nbiot_value_t ota;						//在线升级 string		3308 1 5750
+nbiot_value_t reset;					//远程复位 string		3308 2 5750
+nbiot_value_t work_mode;				//工作模式 string		3308 3 5750
+nbiot_value_t time_strategy;			//时间策略 string		3308 4 5750
+nbiot_value_t data_upload_interval;		//上传间隔 float		3308 5 5900
+nbiot_value_t power_interface;			//电源接口 float		3308 6 5900
 
 
 
@@ -59,15 +59,19 @@ void write_callback( uint16_t       objid,
 #ifdef DEBUG_LOG
     printf( "write /%d/%d/%d：%d\r\n",objid,instid,resid,data->value.as_bool);
 #endif
-    if(objid == 3311 && instid == 0 && resid == 5850)			//开关灯
-	{
-		ControlLightSwitch();
-	}
-	else if(objid == 3311 && instid == 1 && resid == 5851)		//调光
+//    if(objid == 3311 && instid == 0 && resid == 5850)			//开关灯
+//	{
+//		ControlLightSwitch();
+//	}
+	if(objid == 3311 && instid == 0 && resid == 5851)			//调光
 	{
 		ControlLightLevel();
 	}
-	else if(objid == 3308 && instid == 0 && resid == 5750)		//OTA
+	else if(objid == 3308 && instid == 0 && resid == 5750)		//设置UUID
+	{
+		SetDeviceUUID();
+	}
+	else if(objid == 3308 && instid == 1 && resid == 5750)		//OTA
 	{
 		SetUpdateFirmWareInfo();
 	}
@@ -75,19 +79,19 @@ void write_callback( uint16_t       objid,
 	{
 		ControlDeviceReset();
 	}
-	else if(objid == 3308 && instid == 4 && resid == 5750)		//工作模式
+	else if(objid == 3308 && instid == 3 && resid == 5750)		//工作模式
 	{
 		SetDeviceWorkMode();
 	}
-	else if(objid == 3308 && instid == 5 && resid == 5750)		//时间策略
+	else if(objid == 3308 && instid == 4 && resid == 5750)		//时间策略
 	{
 		SetRegularTimeGroups();
 	}
-	else if(objid == 3308 && instid == 1 && resid == 5900)		//上传间隔
+	else if(objid == 3308 && instid == 5 && resid == 5900)		//上传间隔
 	{
 		SetDeviceUpLoadINCL();
 	}
-	else if(objid == 3308 && instid == 3 && resid == 5900)		//电源接口
+	else if(objid == 3308 && instid == 6 && resid == 5900)		//电源接口
 	{
 		SetDevicePowerIntfc();
 	}
@@ -171,7 +175,7 @@ void res_update(time_t interval)
 int create_device(void)
 {
 	int ret = 0;
-	int life_time = 1000;
+	int life_time = 200;
 
 	ret = nbiot_device_create( &dev,
                                life_time,
@@ -199,8 +203,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3317,0,5700,1,0,&in_put_current,0,0);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_current) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	out_put_current.type = NBIOT_FLOAT;
@@ -219,8 +225,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3316,0,5700,1,0,&in_put_voltage,0,0);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_voltage) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	out_put_voltage.type = NBIOT_FLOAT;
@@ -239,8 +247,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3318,0,5700,1,0,&in_put_freq,0,1);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_freq) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	in_put_power_p.type = NBIOT_FLOAT;
@@ -248,8 +258,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3328,0,5700,1,0,&in_put_power_p,0,0);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_power_p) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	in_put_power_q.type = NBIOT_FLOAT;
@@ -257,8 +269,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3328,1,5700,1,0,&in_put_power_q,0,0);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_power_q) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	in_put_power_s.type = NBIOT_FLOAT;
@@ -266,8 +280,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3328,2,5700,1,0,&in_put_power_s,0,1);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_power_s) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	in_put_energy_p.type = NBIOT_FLOAT;
@@ -275,8 +291,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3331,0,5805,1,0,&in_put_energy_p,0,0);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_energy_p) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	in_put_energy_q.type = NBIOT_FLOAT;
@@ -284,8 +302,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3331,1,5805,1,0,&in_put_energy_q,0,0);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_energy_q) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	in_put_energy_s.type = NBIOT_FLOAT;
@@ -293,8 +313,10 @@ int add_object_resource(void)
 	ret = nbiot_resource_add(dev,3331,2,5805,1,0,&in_put_energy_s,0,1);
 	if (ret)
 	{
+#ifdef DEBUG_LOG
 		nbiot_device_destroy(dev);
 		printf("device add resource(in_put_energy_s) failed, code = %d.\r\n", ret);
+#endif
 	}
 	
 	signal_intensity.type = NBIOT_FLOAT;
@@ -308,20 +330,9 @@ int add_object_resource(void)
 #endif
 	}
 	
-	light_control_switch.type = NBIOT_BOOLEAN;
-	light_control_switch.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3311,0,5850,1,0,&light_control_switch,0,0);
-	if (ret)
-	{
-		nbiot_device_destroy(dev);
-#ifdef DEBUG_LOG
-		printf("device add resource(light_control_switch) failed, code = %d.\r\n", ret);
-#endif
-	}
-	
 	light_control_dimmer.type = NBIOT_INTEGER;
 	light_control_dimmer.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3311,1,5851,1,0,&light_control_dimmer,0,1);
+	ret = nbiot_resource_add(dev,3311,0,5851,1,0,&light_control_dimmer,0,1);
 	if (ret)
 	{
 		nbiot_device_destroy(dev);
@@ -329,26 +340,34 @@ int add_object_resource(void)
 		printf("device add resource(light_control_dimmer) failed, code = %d.\r\n", ret);
 #endif
 	}
+
+	device_uuid.type = NBIOT_STRING;
+	device_uuid.flag = NBIOT_READABLE|NBIOT_WRITABLE;
+	ret = nbiot_resource_add(dev,3308,0,5750,1,0,&device_uuid,0,0);
+	
+	if(DeviceUUID != NULL)
+	{
+		nbiot_free(device_uuid.value.as_buf.val);
+		device_uuid.value.as_buf.val = nbiot_strdup((char *)DeviceUUID, UU_ID_LEN - 2);
+		device_uuid.value.as_buf.len = UU_ID_LEN - 2;
+	}
+	
+	if (ret)
+	{
+		nbiot_device_destroy(dev);
+#ifdef DEBUG_LOG
+		printf("device add resource(device_uuid) failed, code = %d.\r\n", ret);
+#endif
+	}
 	
 	ota.type = NBIOT_STRING;
 	ota.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3308,0,5750,1,0,&ota,0,0);
+	ret = nbiot_resource_add(dev,3308,1,5750,1,0,&ota,0,0);
 	if (ret)
 	{
 		nbiot_device_destroy(dev);
 #ifdef DEBUG_LOG
 		printf("device add resource(ota) failed, code = %d.\r\n", ret);
-#endif
-	}
-	
-	data_upload_interval.type = NBIOT_FLOAT;
-	data_upload_interval.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3308,1,5900,1,0,&data_upload_interval,0,0);
-	if (ret)
-	{
-		nbiot_device_destroy(dev);
-#ifdef DEBUG_LOG
-		printf("device add resource(data_upload_interval) failed, code = %d.\r\n", ret);
 #endif
 	}
 	
@@ -363,20 +382,9 @@ int add_object_resource(void)
 #endif
 	}
 	
-	power_interface.type = NBIOT_FLOAT;
-	power_interface.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3308,3,5900,1,0,&power_interface,0,0);
-	if (ret)
-	{
-		nbiot_device_destroy(dev);
-#ifdef DEBUG_LOG
-		printf("device add resource(power_interface) failed, code = %d.\r\n", ret);
-#endif
-	}
-	
 	work_mode.type = NBIOT_STRING;
 	work_mode.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3308,4,5750,1,0,&work_mode,0,0);
+	ret = nbiot_resource_add(dev,3308,3,5750,1,0,&work_mode,0,0);
 	if (ret)
 	{
 		nbiot_device_destroy(dev);
@@ -387,12 +395,34 @@ int add_object_resource(void)
 	
 	time_strategy.type = NBIOT_STRING;
 	time_strategy.flag = NBIOT_READABLE|NBIOT_WRITABLE;
-	ret = nbiot_resource_add(dev,3308,5,5750,1,0,&time_strategy,0,1);
+	ret = nbiot_resource_add(dev,3308,4,5750,1,0,&time_strategy,0,0);
 	if (ret)
 	{
 		nbiot_device_destroy(dev);
 #ifdef DEBUG_LOG
 		printf("device add resource(time_strategy) failed, code = %d.\r\n", ret);
+#endif
+	}
+	
+	data_upload_interval.type = NBIOT_FLOAT;
+	data_upload_interval.flag = NBIOT_READABLE|NBIOT_WRITABLE;
+	ret = nbiot_resource_add(dev,3308,5,5900,1,0,&data_upload_interval,0,0);
+	if (ret)
+	{
+		nbiot_device_destroy(dev);
+#ifdef DEBUG_LOG
+		printf("device add resource(data_upload_interval) failed, code = %d.\r\n", ret);
+#endif
+	}
+	
+	power_interface.type = NBIOT_FLOAT;
+	power_interface.flag = NBIOT_READABLE|NBIOT_WRITABLE;
+	ret = nbiot_resource_add(dev,3308,6,5900,1,0,&power_interface,0,1);
+	if (ret)
+	{
+		nbiot_device_destroy(dev);
+#ifdef DEBUG_LOG
+		printf("device add resource(power_interface) failed, code = %d.\r\n", ret);
 #endif
 	}
 
@@ -544,7 +574,7 @@ void vTaskNET(void *pvParameters)
 		}
 		else
 		{
-			res_update(UpLoadINCL);
+			res_update(1200);
 		}
 		
 		sync_sensor_data();

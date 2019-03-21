@@ -7,23 +7,23 @@
 
 
 
-//开关灯
-void ControlLightSwitch(void)
-{
-	if(light_control_switch.value.as_bool == true)
-	{
-		LightLevelPercent = 200;
-	}
-	else
-	{
-		LightLevelPercent = 0;
-	}
+////开关灯
+//void ControlLightSwitch(void)
+//{
+//	if(light_control_switch.value.as_bool == true)
+//	{
+//		LightLevelPercent = 200;
+//	}
+//	else
+//	{
+//		LightLevelPercent = 0;
+//	}
 
-	DeviceWorkMode = MODE_MANUAL;
+//	DeviceWorkMode = MODE_MANUAL;
 
-	memcpy(&HoldReg[LIGHT_LEVEL_ADD],&LightLevelPercent,LIGHT_LEVEL_LEN - 2);
-	WriteDataFromHoldBufToEeprom(&HoldReg[LIGHT_LEVEL_ADD],LIGHT_LEVEL_ADD, LIGHT_LEVEL_LEN - 2);
-}
+//	memcpy(&HoldReg[LIGHT_LEVEL_ADD],&LightLevelPercent,LIGHT_LEVEL_LEN - 2);
+//	WriteDataFromHoldBufToEeprom(&HoldReg[LIGHT_LEVEL_ADD],LIGHT_LEVEL_ADD, LIGHT_LEVEL_LEN - 2);
+//}
 
 //调光
 void ControlLightLevel(void)
@@ -34,6 +34,19 @@ void ControlLightLevel(void)
 
 	memcpy(&HoldReg[LIGHT_LEVEL_ADD],&LightLevelPercent,LIGHT_LEVEL_LEN - 2);
 	WriteDataFromHoldBufToEeprom(&HoldReg[LIGHT_LEVEL_ADD],LIGHT_LEVEL_ADD, LIGHT_LEVEL_LEN - 2);
+}
+
+//设置UUID
+void SetDeviceUUID(void)
+{
+	if(device_uuid.value.as_buf.len == UU_ID_LEN - 2)
+	{
+		memcpy(&HoldReg[UU_ID_ADD],device_uuid.value.as_buf.val,device_uuid.value.as_buf.len);
+
+		GetDeviceUUID();
+
+		WriteDataFromHoldBufToEeprom(&HoldReg[UU_ID_ADD],UU_ID_ADD, UU_ID_LEN - 2);
+	}
 }
 
 //OTA

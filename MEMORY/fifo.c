@@ -7,8 +7,14 @@ pipe_t pipe[pipe_num]={0};
 int8_t fifo_init(struct memb *ptr)
 {
 	int8_t i=0;
+	
+	for(i=0;i<pipe_num;i++)
+	{
+		pipe[i].used = 0;
+	}
 
 	for(i=0;i<pipe_num;i++)
+	{
 		if(pipe[i].used==0)
 		{
 			pipe[i].used=1;
@@ -17,6 +23,7 @@ int8_t fifo_init(struct memb *ptr)
 
 			return i;
 		}
+	}
 
 	return -1;
 }

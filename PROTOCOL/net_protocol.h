@@ -6,8 +6,9 @@
 #include "task_net.h"
 
 
-void ControlLightSwitch(void);
+//void ControlLightSwitch(void);
 void ControlLightLevel(void);
+void SetDeviceUUID(void);
 void SetUpdateFirmWareInfo(void);
 void ControlDeviceReset(void);
 void SetDeviceWorkMode(void);

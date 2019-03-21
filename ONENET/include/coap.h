@@ -45,7 +45,7 @@ extern "C" {
 
 
 
-#define COAP_RESPONSE_TIMEOUT             100
+#define COAP_RESPONSE_TIMEOUT             60
 #define COAP_MAX_RETRANSMIT               3
 //#define COAP_ACK_RANDOM_FACTOR            1.5
 //#define COAP_MAX_TRANSMIT_WAIT            ((COAP_RESPONSE_TIMEOUT*((1 <<(COAP_MAX_RETRANSMIT+1))-1)*COAP_ACK_RANDOM_FACTOR))	

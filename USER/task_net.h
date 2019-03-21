@@ -29,8 +29,9 @@ extern nbiot_value_t in_put_energy_q;			//无功能量 float		3331 0 5805
 extern nbiot_value_t in_put_energy_s;			//视在能量 float		3331 0 5805
 extern nbiot_value_t signal_intensity;			//信号强度 float		3331 0 5805
 
-extern nbiot_value_t light_control_switch;		//灯具控制 Boolean		3311 0 5850
+//extern nbiot_value_t light_control_switch;		//灯具控制 Boolean		3311 0 5850
 extern nbiot_value_t light_control_dimmer;		//灯具控制 Integer		3311 0 5851
+extern nbiot_value_t device_uuid;				//设备UUID string		3308 0 5750
 extern nbiot_value_t ota;						//在线升级 string		3308 0 5750
 extern nbiot_value_t reset;						//远程复位 string		3308 1 5750
 extern nbiot_value_t work_mode;					//工作模式 string		3308 2 5750
