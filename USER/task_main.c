@@ -13,14 +13,9 @@ u8 mem_percent = 0;
 void vTaskMAIN(void *pvParameters)
 {
 	time_t times_sec = 0;
-	time_t times_sync = 0;
 	time_t times_mem = 0;
 
-	times_sync = GetSysTick1s();
-
-	InventrSetLightLevel(100);
-	delay_ms(1000);
-	InventrSetLightLevel(0);
+	InventrSetLightLevel(INIT_LIGHT_LEVEL);
 
 	while(1)
 	{
@@ -41,13 +36,6 @@ void vTaskMAIN(void *pvParameters)
 			InventrSetLightLevel(LightLevelPercent);
 		}
 
-		if(GetSysTick1s() - times_sync >= 14400)				//每隔1h同步一次时间
-		{
-			times_sync = GetSysTick1s();
-
-			GetTimeOK = 0;
-		}
-
 		if(NeedToReset == 1)								//接收到重启的命令
 		{
 			NeedToReset = 0;
@@ -59,9 +47,9 @@ void vTaskMAIN(void *pvParameters)
 
 		delay_ms(100);
 		MAIN_Satck = uxTaskGetStackHighWaterMark(NULL);
-		
+
 		mem_percent = mem_perused();
-		
+
 		if(GetSysTick1s() - times_mem >= 5)
 		{
 			times_mem = GetSysTick1s();
@@ -75,125 +63,202 @@ void vTaskMAIN(void *pvParameters)
 //轮询时间策略
 void AutoLoopRegularTimeGroups(u8 *percent)
 {
-	u8 i = 0;
-	time_t seconds_now = 0;
-	time_t seconds_24h = 86400;
-	time_t seconds_00h = 0;
+	u8 ret = 0;
+	u16 gate0 = 0;
+	u16 gate1 = 0;
+	u16 gate2 = 0;
+	u16 gate24 = 1440;	//24*60;
+	u16 gate_n = 0;
+	
+	pRegularTime tmp_time = NULL;
 
-//	if(GetTimeOK != 0)
+	if(GetTimeOK != 0)
 	{
-		seconds_now = calendar.hour * 3600 + calendar.min * 60 + calendar.sec;	//获取当前时分秒对应的秒数
-
-		for(i = 0; i < MAX_GROUP_NUM; i ++)
+		xSemaphoreTake(xMutex_STRATEGY, portMAX_DELAY);
+		
+		if(calendar.week >= 1 && calendar.week <= 5)	//判断是否是工作日
 		{
-			switch(RegularTimeStruct[i].type)
+			if(RegularTimeWeekDay->next != NULL)		//判断策略列表是否不为空
 			{
-				case TYPE_WEEKDAY:		//周一至周五
-					if(calendar.week >= 1 && calendar.week <= 5)		//判断现在是否是工作日
+				for(tmp_time = RegularTimeWeekDay->next; tmp_time != NULL; tmp_time = tmp_time->next)	//轮训策略列表
+				{
+					if(tmp_time->hour 	== calendar.hour &&
+					   tmp_time->minute == calendar.min)		//判断当前时间是否同该条策略时间相同
 					{
-						if(RegularTimeStruct[i].s_seconds > RegularTimeStruct[i].e_seconds)			//起始时间比结束时间早一天
+						ret = 1;
+					}
+					else if(tmp_time->next != NULL)				//该条策略是不是最后一条
+					{
+						if(tmp_time->next->hour   == calendar.hour &&
+					       tmp_time->next->minute == calendar.min)		//判断该条策略的next的时间是否与当前时间相同
 						{
-							if((RegularTimeStruct[i].s_seconds <= seconds_now && seconds_now <= seconds_24h) || \
-								(seconds_00h <= seconds_now && seconds_now <= RegularTimeStruct[i].e_seconds))
-							{
-								*percent = RegularTimeStruct[i].percent * 2;
-
-								i = MAX_GROUP_NUM;
-							}
-							else
-							{
-								*percent = 0;
-							}
+							tmp_time = tmp_time->next;
+							
+							ret = 1;
 						}
-						else if(RegularTimeStruct[i].s_seconds < RegularTimeStruct[i].e_seconds)	//起始时间和结束时间是同一天
+						else
 						{
-							if(RegularTimeStruct[i].s_seconds <= seconds_now && seconds_now <= RegularTimeStruct[i].e_seconds)
-							{
-								*percent = RegularTimeStruct[i].percent * 2;
+							gate1 = tmp_time->hour * 60 + tmp_time->minute;					//该条策略的分钟数
+							gate2 = tmp_time->next->hour * 60 + tmp_time->next->minute;		//该条策略的next的分钟数
+							gate_n = calendar.hour * 60 + calendar.min;						//当前时间的分钟数
 
-								i = MAX_GROUP_NUM;
-							}
-							else
+							if(gate1 < gate2)												//该条策略时间早于next的时间
 							{
-								*percent = 0;
+								if(gate1 <= gate_n && gate_n <= gate2)						//判断当前时间是否在两条策略时间段中间
+								{
+									ret = 1;
+								}
+							}
+							else if(gate1 > gate2)											//该条策略时间晚于next的时间
+							{
+								if(gate1 <= gate_n && gate_n <= gate24)						//判断当前时间是否在该条策略时间和24点时间段中间
+								{
+									ret = 1;
+								}
+								else if(gate0 <= gate_n && gate_n <= gate2)					//判断当前时间是否在0点和next的时间段中间
+								{
+									ret = 1;
+								}
 							}
 						}
 					}
-				break;
-
-				case TYPE_WEEKEND:		//周六至周日
-					if(calendar.week >= 6 && calendar.week <= 7)		//判断现在是否是周六或周日
+					else
 					{
-						if(RegularTimeStruct[i].s_seconds > RegularTimeStruct[i].e_seconds)			//起始时间比结束时间早一天
-						{
-							if((RegularTimeStruct[i].s_seconds <= seconds_now && seconds_now <= seconds_24h) || \
-								(seconds_00h <= seconds_now && seconds_now <= RegularTimeStruct[i].e_seconds))
-							{
-								*percent = RegularTimeStruct[i].percent * 2;
-
-								i = MAX_GROUP_NUM;
-							}
-							else
-							{
-								*percent = 0;
-							}
-						}
-						else if(RegularTimeStruct[i].s_seconds < RegularTimeStruct[i].e_seconds)	//起始时间和结束时间是同一天
-						{
-							if(RegularTimeStruct[i].s_seconds <= seconds_now && seconds_now <= RegularTimeStruct[i].e_seconds)
-							{
-								*percent = RegularTimeStruct[i].percent * 2;
-
-								i = MAX_GROUP_NUM;
-							}
-							else
-							{
-								*percent = 0;
-							}
-						}
+						ret = 1;
 					}
-				break;
 
-				case TYPE_HOLIDAY:		//节假日
-					if((RegularTimeStruct[i].s_year + 2000 <= calendar.w_year && calendar.w_year <= RegularTimeStruct[i].e_year + 2000) && \
-						(RegularTimeStruct[i].s_month <= calendar.w_month && calendar.w_month <= RegularTimeStruct[i].e_month) && \
-						(RegularTimeStruct[i].s_date <= calendar.w_date && calendar.w_date <= RegularTimeStruct[i].e_date))		//判断现在是否是节假日时间区间内
+					if(ret == 1)
 					{
-						if(RegularTimeStruct[i].s_seconds > RegularTimeStruct[i].e_seconds)			//起始时间比结束时间早一天
-						{
-							if((RegularTimeStruct[i].s_seconds <= seconds_now && seconds_now <= seconds_24h) || \
-								(seconds_00h <= seconds_now && seconds_now <= RegularTimeStruct[i].e_seconds))
-							{
-								*percent = RegularTimeStruct[i].percent * 2;
+						*percent = tmp_time->percent * 2;
 
-								i = MAX_GROUP_NUM;
-							}
-							else
-							{
-								*percent = 0;
-							}
-						}
-						else if(RegularTimeStruct[i].s_seconds < RegularTimeStruct[i].e_seconds)	//起始时间和结束时间是同一天
-						{
-							if(RegularTimeStruct[i].s_seconds <= seconds_now && seconds_now <= RegularTimeStruct[i].e_seconds)
-							{
-								*percent = RegularTimeStruct[i].percent * 2;
-
-								i = MAX_GROUP_NUM;
-							}
-							else
-							{
-								*percent = 0;
-							}
-						}
+						break;
 					}
-				break;
-
-				default:
-
-				break;
+				}
 			}
 		}
+		else if(calendar.week >= 6 && calendar.week <= 7)
+		{
+			if(RegularTimeWeekEnd->next != NULL)
+			{
+				for(tmp_time = RegularTimeWeekEnd->next; tmp_time != NULL; tmp_time = tmp_time->next)
+				{
+					if(tmp_time->hour 	== calendar.hour &&
+					   tmp_time->minute == calendar.min)
+					{
+						ret = 1;
+					}
+					else if(tmp_time->next != NULL)
+					{
+						if(tmp_time->next->hour   == calendar.hour &&
+					       tmp_time->next->minute == calendar.min)
+						{
+							tmp_time = tmp_time->next;
+							
+							ret = 1;
+						}
+						else
+						{
+							gate1 = tmp_time->hour * 60 + tmp_time->minute;
+							gate2 = tmp_time->next->hour * 60 + tmp_time->next->minute;
+							gate_n = calendar.hour * 60 + calendar.min;
+
+							if(gate1 < gate2)
+							{
+								if(gate1 <= gate_n && gate_n <= gate2)
+								{
+									ret = 1;
+								}
+							}
+							else if(gate1 > gate2)
+							{
+								if(gate1 <= gate_n && gate_n <= gate24)
+								{
+									ret = 1;
+								}
+								else if(gate0 <= gate_n && gate_n <= gate2)
+								{
+									ret = 1;
+								}
+							}
+						}
+					}
+					else
+					{
+						ret = 1;
+					}
+
+					if(ret == 1)
+					{
+						*percent = tmp_time->percent * 2;
+
+						break;
+					}
+				}
+			}
+		}
+		
+		if(RegularTimeHoliday->next != NULL)
+		{
+			for(tmp_time = RegularTimeHoliday->next; tmp_time != NULL; tmp_time = tmp_time->next)
+			{
+				if(tmp_time->year + 2000 	== calendar.w_year &&
+				   tmp_time->month 			== calendar.w_month &&
+				   tmp_time->date 			== calendar.w_date &&
+				   tmp_time->hour 			== calendar.hour &&
+				   tmp_time->minute 		== calendar.min)
+				{
+					ret = 1;
+				}
+				else if(tmp_time->next != NULL)
+				{
+					if(tmp_time->next->hour   == calendar.hour &&
+					   tmp_time->next->minute == calendar.min)
+					{
+						tmp_time = tmp_time->next;
+						
+						ret = 1;
+					}
+					else
+					{
+						gate1 = tmp_time->hour * 60 + tmp_time->minute;
+						gate2 = tmp_time->next->hour * 60 + tmp_time->next->minute;
+						gate_n = calendar.hour * 60 + calendar.min;
+
+						if(gate1 < gate2)
+						{
+							if(gate1 <= gate_n && gate_n <= gate2)
+							{
+								ret = 1;
+							}
+						}
+						else if(gate1 > gate2)
+						{
+							if(gate1 <= gate_n && gate_n <= gate24)
+							{
+								ret = 1;
+							}
+							else if(gate0 <= gate_n && gate_n <= gate2)
+							{
+								ret = 1;
+							}
+						}
+					}
+				}
+				else
+				{
+					ret = 1;
+				}
+
+				if(ret == 1)
+				{
+					*percent = tmp_time->percent * 2;
+
+					break;
+				}
+			}
+		}
+		
+		xSemaphoreGive(xMutex_STRATEGY);
 	}
 }
 

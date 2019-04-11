@@ -2,6 +2,7 @@
 #include "led.h"
 #include "delay.h"
 #include "task_net.h"
+#include "platform_config.h"
 
 
 TaskHandle_t xHandleTaskLED = NULL;
@@ -18,9 +19,7 @@ void vTaskLED(void *pvParameters)
 			IWDG_Feed();
 		}
 		
-		if(dev->state == STATE_REGISTERED || 
-		   dev->state == STATE_REG_UPDATE_PENDING ||
-		   dev->state == STATE_REG_UPDATE_NEEDED)		//在线状态，每3秒短闪一次
+		if(Registered_Flag == 1)		//在线状态，每3秒短闪一次
 		{
 			if(cnt % 300 == 0)
 			{

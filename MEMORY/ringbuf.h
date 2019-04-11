@@ -64,13 +64,13 @@
  *             elements.
  *
  */
-struct ringbuf {
+typedef struct ringbuf {
   uint8_t *data;
   uint16_t mask;
   
   /* XXX these must be 8-bit quantities to avoid race conditions. */
   uint16_t put_ptr, get_ptr;
-};
+} RingBuf, *RingBuf_p;
 
 /**
  * \brief      Initialize a ring buffer

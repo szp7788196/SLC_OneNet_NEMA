@@ -16,6 +16,54 @@
 #define BCXX_PRINTF_RX_BUF
 
 
+#define TIMEOUT_1S 100
+#define TIMEOUT_2S 200
+#define TIMEOUT_3S 300
+#define TIMEOUT_4S 400
+#define TIMEOUT_5S 500
+#define TIMEOUT_6S 600
+#define TIMEOUT_7S 700
+#define TIMEOUT_10S 1000
+#define TIMEOUT_11S 1000
+#define TIMEOUT_12S 1000
+#define TIMEOUT_13S 1000
+#define TIMEOUT_14S 1000
+#define TIMEOUT_15S 1500
+#define TIMEOUT_20S 2000
+#define TIMEOUT_25S 2500
+#define TIMEOUT_30S 3000
+#define TIMEOUT_35S 3500
+#define TIMEOUT_40S 4000
+#define TIMEOUT_45S 4500
+#define TIMEOUT_50S 5000
+#define TIMEOUT_55S 5500
+#define TIMEOUT_60S 6000
+#define TIMEOUT_65S 6500
+#define TIMEOUT_70S 7000
+#define TIMEOUT_75S 7500
+#define TIMEOUT_80S 8000
+#define TIMEOUT_85S 8500
+#define TIMEOUT_90S 9000
+#define TIMEOUT_95S 9500
+#define TIMEOUT_100S 10000
+#define TIMEOUT_105S 10500
+#define TIMEOUT_110S 11000
+#define TIMEOUT_115S 11500
+#define TIMEOUT_120S 12000
+#define TIMEOUT_125S 12500
+#define TIMEOUT_130S 13000
+#define TIMEOUT_135S 13500
+#define TIMEOUT_140S 14000
+#define TIMEOUT_145S 14500
+#define TIMEOUT_150S 15000
+#define TIMEOUT_155S 15500
+#define TIMEOUT_160S 16000
+#define TIMEOUT_165S 16500
+#define TIMEOUT_170S 17000
+#define TIMEOUT_175S 17500
+#define TIMEOUT_180S 18000
+
+
 typedef enum
 {
 	MIPL_DEBUG_LEVEL_NONE = 0,
@@ -71,6 +119,37 @@ uint32_t ip_SendData(int8_t * buf, uint32_t len);
 
 void netif_rx(uint8_t*buf,uint16_t *read);
 
+
+unsigned char bcxx_set_AT_ATE(char cmd);
+unsigned char bcxx_set_NATSPEED(u32 baud_rate);
+unsigned char bcxx_set_AT_CFUN(char cmd);
+unsigned char bcxx_set_AT_NBAND(unsigned char *imsi);
+unsigned char bcxx_get_AT_CSQ(void);
+unsigned char bcxx_get_AT_CGSN(void);
+unsigned char bcxx_get_AT_NCCID(void);
+unsigned char bcxx_get_AT_CIMI(void);
+unsigned char bcxx_set_AT_CELL_RESELECTION(void);
+unsigned char bcxx_set_AT_NRB(void);
+unsigned char bcxx_set_AT_NCDP(char *addr, char *port);
+unsigned char bcxx_set_AT_CSCON(unsigned char cmd);
+unsigned char bcxx_set_AT_CEREG(unsigned char cmd);
+unsigned char bcxx_set_AT_NNMI(unsigned char cmd);
+unsigned char bcxx_set_AT_NSONMI(unsigned char cmd);
+unsigned char bcxx_set_AT_CGATT(unsigned char cmd);
+unsigned char bcxx_set_AT_QREGSWT(unsigned char cmd);
+unsigned char bcxx_set_AT_CEDRXS(unsigned char cmd);
+unsigned char bcxx_set_AT_CPSMS(unsigned char cmd);
+unsigned char bcxx_set_AT_NMGS(unsigned int len,char *buf);
+unsigned char bcxx_get_AT_CGPADDR(char **ip);
+unsigned char bcxx_set_AT_NSOCR(char *type, char *protocol,char *port);
+unsigned char bcxx_set_AT_NSOFT(unsigned char socket, char *ip,char *port,unsigned int len,char *inbuf);
+unsigned char bcxx_set_AT_NSOCL(unsigned char socket);
+unsigned char bcxx_set_AT_NSOCO(unsigned char socket, char *ip,char *port);
+unsigned char bcxx_set_AT_NSOSD(unsigned char socket, unsigned int len,char *inbuf);
+unsigned char bcxx_get_AT_CCLK(char *buf);
+unsigned char bcxx_set_AT_MIPLCONFIG(char *ip,char *port);
+
+
 void bcxx_create(void);
 void bcxx_addobj(uint16_t objid,uint8_t insCount,char *insBitmap,uint16_t attrcount,uint16_t actcount);
 void bcxx_delobj(uint16_t objid);
@@ -84,7 +163,5 @@ void bcxx_observe_rsp(int suc,const nbiot_uri_t uri);
 void bcxx_discover_rsp(const nbiot_uri_t *uri,size_t lenth,char *value);
 void bcxx_write_rsp(int suc,uint16_t ackid);
 void bcxx_execute_rsp(int suc,uint16_t ackid);
-uint8_t bcxx_get_csq(void);
-uint8_t bcxx_get_AT_CCLK(char *buf);
 
 #endif

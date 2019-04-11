@@ -107,7 +107,7 @@ int nbiot_register_update(nbiot_device_t  *dev,
 			                      length,
 			                      registraction_update_reply);
 			
-//			SendCmd("AT+MIPLCLOSE=0\r\n","OK",300,0,5);//²âÊÔÓÃ
+//			SendCmd("AT+MIPLCLOSE=0\r\n","OK",300,0,TIMEOUT_5S);//²âÊÔÓÃ
 //			dev->state = STATE_REG_FAILED;
 		}
 		else

@@ -7,7 +7,7 @@
 
 sendmsg callback=NULL;
 volatile char *flag_ok=NULL;
-struct ringbuf *result_ptr=NULL;
+RingBuf *result_ptr=NULL;
 
 void register_cmd_handler(sendmsg func,void *result_buf, volatile char *flag)
 {
@@ -16,93 +16,88 @@ void register_cmd_handler(sendmsg func,void *result_buf, volatile char *flag)
 	flag_ok = flag;
 }
 
-char SendCmd(char* cmd, uint8_t *result,uint16_t timeout,uint8_t retry,uint16_t waittime)
+char SendCmd(char* cmd, uint8_t *result,uint16_t waittime,uint8_t retry,uint16_t timeout)
 {
-	//	printf("send cmd:%s",cmd);	
+	//	printf("send cmd:%s",cmd);
 	char *msg_p = NULL;
-	time_t  nowtime = 0,newtime = 0,sum = 0;
+	time_t  newtime = 0;
 	uint8_t retry_num = 0,retryflag = 0;
-	
+
 	if(callback == NULL || result_ptr == NULL || flag_ok == NULL)
 		return 2 ;
-	
+
 	*flag_ok = 0;
-	
+
 	ringbuf_clear(result_ptr);//清除之前可能残留的信息
-#ifdef DEBUG_LOG	
+#ifdef DEBUG_LOG
 	printf("cmd:%s\r\n",cmd);
-#endif	
+#endif
 	callback((uint8_t*)cmd, strlen((const char *)cmd));
-	// ringbuf_clear(result_ptr);//清除之前可能残留的信息
-	
-	nowtime = nbiot_time();
-	
+
 	while(1)
 	{
-		if(sum > waittime)
+		if(newtime >= timeout)
 		{
 			if(++ retry_num > retry)
 				return 0;
-			
+
 			retryflag = 1;
 		}
-		
+
 		if(*flag_ok == 1)
 		{
 #ifdef DEBUG_LOG
 			printf("cmd_rsp:%s",result_ptr->data);
-#endif			
+#endif
 			*flag_ok = 0;
-			
+
 			msg_p = strstr((char *)result_ptr->data,(char *)result);
-			
+
 			if(msg_p != NULL)
 			{
-				ringbuf_clear(result_ptr);
+//				ringbuf_clear(result_ptr);
 				break;
 			}
 			else
 			{
 				msg_p = strstr((char *)result_ptr->data,"ERROR");
 				ringbuf_clear(result_ptr);
-				
+
 				if(msg_p != NULL)
-					return 2; 
-				/*	 
+					return 2;
+				/*
 				if(retry==1){
 				mDelay(3000);
 				printf("retry cmd:%s",cmd);
-				callback((uint8_t*)cmd, strlen((const char *)cmd));							   
-				}	
-				*/						 
+				callback((uint8_t*)cmd, strlen((const char *)cmd));
+				}
+				*/
 			}
 		}
 		else
 		{
-			newtime = nbiot_time();
-			sum = newtime - nowtime;					
+			newtime ++;
 		}
-		
+
 		if(retryflag == 1)
 		{
 			retryflag = 0;
-			sum = 0;
-			nowtime = nbiot_time();
-			
+			newtime = 0;
+
 			if(retry_num > 0 && retry_num < retry + 1)
 			{
 #ifdef DEBUG_LOG
 				printf("retry cmd:%s",cmd);
 #endif
-				callback((uint8_t*)cmd, strlen((const char *)cmd));	
+				callback((uint8_t*)cmd, strlen((const char *)cmd));
 			}
 		}
-		
+
 		nbiot_sleep(10);
 	}
-	
-	nbiot_sleep(timeout);
-	
+
+	nbiot_sleep(waittime);
+
 	return 1;
 }
 
@@ -110,39 +105,38 @@ void SentData(char* cmd, uint8_t *result,uint16_t timeout)
 {
 //	char *msg_p = NULL;
 	time_t  nowtime = 0,newtime = 0,sum = 0;
-	
+
 	if(callback == NULL || result_ptr == NULL || flag_ok == NULL)
 		return;
-	
+
 	*flag_ok = 0;
-	
+
 	ringbuf_clear(result_ptr);//清除之前可能残留的信息
-#ifdef DEBUG_LOG	
+#ifdef DEBUG_LOG
 	printf("Data:%s\r\n",cmd);
-#endif	
+#endif
 	callback((uint8_t*)cmd, strlen((const char *)cmd));
-	// ringbuf_clear(result_ptr);//清除之前可能残留的信息
-	
+
 	nowtime = nbiot_time();
 
 	while(1)
 	{
 		if(sum > 2)
 			break;
-		
+
 		if(*flag_ok == 1)
-		{			 
+		{
 			*flag_ok = 0;
-#ifdef DEBUG_LOG			
+#ifdef DEBUG_LOG
 			printf("data_rsp:%s\r\n",result_ptr->data);
-#endif			
+#endif
 			/*
 			msg_p=strstr(result_ptr->data,result);
 			if(msg_p!=NULL){
 			ringbuf_clear(result_ptr);
 			break;
 			}*/
-			
+
 			break;
 		}
 		else
@@ -150,10 +144,10 @@ void SentData(char* cmd, uint8_t *result,uint16_t timeout)
 			newtime = nbiot_time();
 			sum = newtime - nowtime;
 		}
-		
+
 		nbiot_sleep(10);
 	}
-	
+
 	nbiot_sleep(timeout);
 }
 

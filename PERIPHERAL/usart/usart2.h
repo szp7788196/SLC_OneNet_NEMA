@@ -5,10 +5,11 @@
 #include "stdlib.h"
 #include "string.h"
 #include "fifo.h"
+#include "ringbuf.h"
 
 extern volatile char rsp_ok;
-extern struct ringbuf ring_fifo;
-extern struct ringbuf ring_fifo1;
+extern RingBuf ring_fifo;
+extern RingBuf ring_fifo1;
 extern uint8_t rx_fifo[512];
 extern uint8_t rx_fifo1[512];
 extern int8_t dl_buf_id;

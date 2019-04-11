@@ -163,18 +163,18 @@ void SetRegularTimeGroups(void)
 {
 	u8 group_num = 0;
 	u16 i = 0;
-	u8 temp_buf[64];
-	u8 time_group[64];
+	u8 temp_buf[32];
+	u8 time_group[32];
 	u16 crc16 = 0;
 
-	if(time_strategy.value.as_buf.len == 26)
+	if(time_strategy.value.as_buf.len == 16)
 	{
-		memset(temp_buf,0,64);
-		memset(time_group,0,64);
+		memset(temp_buf,0,32);
+		memset(time_group,0,32);
 
 		memcpy(temp_buf,time_strategy.value.as_buf.val,time_strategy.value.as_buf.len);
 
-		for(i = 0; i < 26; i ++)
+		for(i = 0; i < 16; i ++)
 		{
 			temp_buf[i] -= 0x30;
 		}
@@ -189,47 +189,57 @@ void SetRegularTimeGroups(void)
 			time_group[3] = temp_buf[7] * 10 + temp_buf[8];								//date
 			time_group[4] = temp_buf[9] * 10 + temp_buf[10];							//hour
 			time_group[5] = temp_buf[11] * 10 + temp_buf[12];							//minute
-			time_group[6] = temp_buf[23] * 100 + temp_buf[24] * 10 + temp_buf[25];		//percent
+			time_group[6] = temp_buf[13] * 100 + temp_buf[14] * 10 + temp_buf[15];		//percent
 
-			time_group[9] = temp_buf[2];												//type
-			time_group[10] = temp_buf[13] * 10 + temp_buf[14];							//year
-			time_group[11] = temp_buf[15] * 10 + temp_buf[16];							//month
-			time_group[12] = temp_buf[17] * 10 + temp_buf[18];							//date
-			time_group[13] = temp_buf[19] * 10 + temp_buf[20];							//hour
-			time_group[14] = temp_buf[21] * 10 + temp_buf[22];							//minute
-			time_group[15] = temp_buf[23] * 100 + temp_buf[24] * 10 + temp_buf[25];		//percent
-
-			crc16 = CRC16(&time_group[0],7);
-			time_group[7] = (u8)(crc16 >> 8);
-			time_group[8] = (u8)(crc16 & 0x00FF);
-
-			crc16 = CRC16(&time_group[9],7);
-			time_group[16] = (u8)(crc16 >> 8);
-			time_group[17] = (u8)(crc16 & 0x00FF);
-
-
-			RegularTimeStruct[group_num].type 		= time_group[0];
-
-			RegularTimeStruct[group_num].s_year 	= time_group[1];
-			RegularTimeStruct[group_num].s_month 	= time_group[2];
-			RegularTimeStruct[group_num].s_date 	= time_group[3];
-			RegularTimeStruct[group_num].s_hour 	= time_group[4];
-			RegularTimeStruct[group_num].s_minute 	= time_group[5];
-
-			RegularTimeStruct[group_num].percent 	= time_group[6];
-
-			RegularTimeStruct[group_num].e_year 	= time_group[10];
-			RegularTimeStruct[group_num].e_month 	= time_group[11];
-			RegularTimeStruct[group_num].e_date 	= time_group[12];
-			RegularTimeStruct[group_num].e_hour 	= time_group[13];
-			RegularTimeStruct[group_num].e_minute 	= time_group[14];
-
-			RegularTimeStruct[group_num].s_seconds  = RegularTimeStruct[group_num].s_hour * 3600 + RegularTimeStruct[group_num].s_minute * 60;
-			RegularTimeStruct[group_num].e_seconds  = RegularTimeStruct[group_num].e_hour * 3600 + RegularTimeStruct[group_num].e_minute * 60;
-
-			for(i = 0; i < 18; i ++)
+			if(time_group[0] != 0)
 			{
-				AT24CXX_WriteOneByte(TIME_RULE_ADD + group_num * 18 + i,time_group[i]);
+				pRegularTime tmp_time = NULL;
+				
+				tmp_time = (pRegularTime)mymalloc(sizeof(RegularTime_S));
+
+				tmp_time->prev = NULL;
+				tmp_time->next = NULL;
+				
+				crc16 = CRC16(&time_group[0],7);
+				time_group[7] = (u8)(crc16 >> 8);
+				time_group[8] = (u8)(crc16 & 0x00FF);
+
+				tmp_time->number	= group_num;
+				tmp_time->type 		= time_group[0];
+				tmp_time->year 		= time_group[1];
+				tmp_time->month 	= time_group[2];
+				tmp_time->date 		= time_group[3];
+				tmp_time->hour 		= time_group[4];
+				tmp_time->minute 	= time_group[5];
+				tmp_time->percent 	= time_group[6];
+				
+				switch(tmp_time->type)
+				{
+					case TYPE_WEEKDAY:
+						RegularTimeGroupAdd(TYPE_WEEKDAY,tmp_time);
+					break;
+					
+					case TYPE_WEEKEND:
+						RegularTimeGroupAdd(TYPE_WEEKEND,tmp_time);
+					break;
+					
+					case TYPE_HOLIDAY:
+						RegularTimeGroupAdd(TYPE_HOLIDAY,tmp_time);
+					break;
+					
+					default:
+						
+					break;
+				}
+			}
+			else
+			{
+				RegularTimeGroupSub(group_num);
+			}
+			
+			for(i = 0; i < TIME_RULE_LEN; i ++)
+			{
+				AT24CXX_WriteOneByte(TIME_RULE_ADD + group_num * TIME_RULE_LEN + i,time_group[i]);
 			}
 		}
 	}

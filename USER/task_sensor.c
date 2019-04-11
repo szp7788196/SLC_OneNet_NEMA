@@ -17,11 +17,6 @@ void vTaskSENSOR(void *pvParameters)
 {
 	time_t times_sec = 0;
 
-#ifndef SMALLER_BOARD
-	SHT2x_Init();
-	Bh1750_Init();
-#endif
-
 	p_tSensorMsg = (SensorMsg_S *)mymalloc(sizeof(SensorMsg_S));
 
 	while(1)
@@ -29,12 +24,6 @@ void vTaskSENSOR(void *pvParameters)
 		if(GetSysTick1s() - times_sec >= 10)		//每隔10秒更新一次传感器数据
 		{
 			times_sec = GetSysTick1s();
-
-#ifndef SMALLER_BOARD
-			Temperature = Sht2xReadTemperature();				//读取温度
-			Humidity = Sht2xReadHumidity();						//读取湿度
-			Illumination = Bh1750ReadIllumination();			//读取光照
-#endif
 
 			InventrOutPutCurrent = InventrGetOutPutCurrent();	//读取电源输出电流
 			delay_ms(500);
@@ -44,11 +33,6 @@ void vTaskSENSOR(void *pvParameters)
 				dev->state == STATE_REG_UPDATE_PENDING ||
 				dev->state == STATE_REG_UPDATE_NEEDED)			//设备此时是在线状态
 			{
-#ifndef	SMALLER_BOARD
-				p_tSensorMsg->temperature = Temperature;
-				p_tSensorMsg->humidity = Humidity;
-				p_tSensorMsg->illumination = Illumination;
-#endif
 				p_tSensorMsg->out_put_current = InventrOutPutCurrent;
 				p_tSensorMsg->out_put_voltage = InventrOutPutVoltage;
 				p_tSensorMsg->signal_intensity = (float)((-113) + (SignalIntensity * 2));
@@ -78,7 +62,7 @@ void vTaskSENSOR(void *pvParameters)
 
 		delay_ms(100);
 
-		SENSOR_Satck = uxTaskGetStackHighWaterMark(NULL);
+//		SENSOR_Satck = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 

@@ -137,27 +137,14 @@ void res_update(time_t interval)
 {
 	static time_t last_time = 0;
 	static time_t cur_time = 0;
-	
+
 	if(cur_time >= last_time + interval)
 	{
 		cur_time = 0;
 		last_time = 0;
-		
+
 		out_put_current.flag 	|= NBIOT_UPDATED;
 		out_put_voltage.flag 	|= NBIOT_UPDATED;
-		signal_intensity.flag 	|= NBIOT_UPDATED;
-		
-		in_put_current.flag 	|= NBIOT_UPDATED;
-		out_put_current.flag 	|= NBIOT_UPDATED;
-		in_put_voltage.flag 	|= NBIOT_UPDATED;
-		out_put_voltage.flag 	|= NBIOT_UPDATED;
-		in_put_freq.flag 		|= NBIOT_UPDATED;
-		in_put_power_p.flag 	|= NBIOT_UPDATED;
-		in_put_power_q.flag 	|= NBIOT_UPDATED;
-		in_put_power_s.flag 	|= NBIOT_UPDATED;
-		in_put_energy_p.flag 	|= NBIOT_UPDATED;
-		in_put_energy_q.flag 	|= NBIOT_UPDATED;
-		in_put_energy_s.flag 	|= NBIOT_UPDATED;
 		signal_intensity.flag 	|= NBIOT_UPDATED;
 	}
 	else if(cur_time == 0 && last_time == 0)
@@ -208,7 +195,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_current) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	out_put_current.type = NBIOT_FLOAT;
 	out_put_current.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3317,1,5700,1,0,&out_put_current,0,1);
@@ -219,7 +206,7 @@ int add_object_resource(void)
 		printf("device add resource(out_put_current) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_voltage.type = NBIOT_FLOAT;
 	in_put_voltage.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3316,0,5700,1,0,&in_put_voltage,0,0);
@@ -230,7 +217,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_voltage) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	out_put_voltage.type = NBIOT_FLOAT;
 	out_put_voltage.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3316,1,5700,1,0,&out_put_voltage,0,1);
@@ -241,7 +228,7 @@ int add_object_resource(void)
 		printf("device add resource(out_put_voltage) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_freq.type = NBIOT_FLOAT;
 	in_put_freq.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3318,0,5700,1,0,&in_put_freq,0,1);
@@ -252,7 +239,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_freq) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_power_p.type = NBIOT_FLOAT;
 	in_put_power_p.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3328,0,5700,1,0,&in_put_power_p,0,0);
@@ -263,7 +250,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_power_p) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_power_q.type = NBIOT_FLOAT;
 	in_put_power_q.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3328,1,5700,1,0,&in_put_power_q,0,0);
@@ -274,7 +261,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_power_q) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_power_s.type = NBIOT_FLOAT;
 	in_put_power_s.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3328,2,5700,1,0,&in_put_power_s,0,1);
@@ -285,7 +272,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_power_s) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_energy_p.type = NBIOT_FLOAT;
 	in_put_energy_p.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3331,0,5805,1,0,&in_put_energy_p,0,0);
@@ -296,7 +283,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_energy_p) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_energy_q.type = NBIOT_FLOAT;
 	in_put_energy_q.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3331,1,5805,1,0,&in_put_energy_q,0,0);
@@ -307,7 +294,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_energy_q) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	in_put_energy_s.type = NBIOT_FLOAT;
 	in_put_energy_s.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3331,2,5805,1,0,&in_put_energy_s,0,1);
@@ -318,7 +305,7 @@ int add_object_resource(void)
 		printf("device add resource(in_put_energy_s) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	signal_intensity.type = NBIOT_FLOAT;
 	signal_intensity.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3330,0,5700,1,0,&signal_intensity,0,1);
@@ -329,7 +316,7 @@ int add_object_resource(void)
 		printf("device add resource(signal_intensity) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	light_control_dimmer.type = NBIOT_INTEGER;
 	light_control_dimmer.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3311,0,5851,1,0,&light_control_dimmer,0,1);
@@ -344,14 +331,14 @@ int add_object_resource(void)
 	device_uuid.type = NBIOT_STRING;
 	device_uuid.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,0,5750,1,0,&device_uuid,0,0);
-	
+
 	if(DeviceUUID != NULL)
 	{
 		nbiot_free(device_uuid.value.as_buf.val);
 		device_uuid.value.as_buf.val = nbiot_strdup((char *)DeviceUUID, UU_ID_LEN - 2);
 		device_uuid.value.as_buf.len = UU_ID_LEN - 2;
 	}
-	
+
 	if (ret)
 	{
 		nbiot_device_destroy(dev);
@@ -359,7 +346,7 @@ int add_object_resource(void)
 		printf("device add resource(device_uuid) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	ota.type = NBIOT_STRING;
 	ota.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,1,5750,1,0,&ota,0,0);
@@ -370,7 +357,7 @@ int add_object_resource(void)
 		printf("device add resource(ota) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	reset.type = NBIOT_STRING;
 	reset.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,2,5750,1,0,&reset,0,0);
@@ -381,7 +368,7 @@ int add_object_resource(void)
 		printf("device add resource(reset) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	work_mode.type = NBIOT_STRING;
 	work_mode.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,3,5750,1,0,&work_mode,0,0);
@@ -392,7 +379,7 @@ int add_object_resource(void)
 		printf("device add resource(work_mode) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	time_strategy.type = NBIOT_STRING;
 	time_strategy.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,4,5750,1,0,&time_strategy,0,0);
@@ -403,7 +390,7 @@ int add_object_resource(void)
 		printf("device add resource(time_strategy) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	data_upload_interval.type = NBIOT_FLOAT;
 	data_upload_interval.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,5,5900,1,0,&data_upload_interval,0,0);
@@ -414,7 +401,7 @@ int add_object_resource(void)
 		printf("device add resource(data_upload_interval) failed, code = %d.\r\n", ret);
 #endif
 	}
-	
+
 	power_interface.type = NBIOT_FLOAT;
 	power_interface.flag = NBIOT_READABLE|NBIOT_WRITABLE;
 	ret = nbiot_resource_add(dev,3308,6,5900,1,0,&power_interface,0,1);
@@ -434,14 +421,14 @@ void unregister_all_things(void)
 	nbiot_device_close(dev,0);
 	nbiot_device_destroy(dev);
 	nbiot_clear_environment();
-	
+
 	USART2_Init(9600);
 }
 
 void sync_sensor_data(void)
 {
 	BaseType_t xResult;
-	
+
 	xResult = xQueueReceive(xQueue_sensor,
 							(void *)p_tSensorMsgNet,
 							(TickType_t)pdMS_TO_TICKS(50));
@@ -450,31 +437,18 @@ void sync_sensor_data(void)
 		out_put_current.value.as_float 	= (double)p_tSensorMsgNet->out_put_current;
 		out_put_voltage.value.as_float 	= (double)p_tSensorMsgNet->out_put_voltage;
 		signal_intensity.value.as_float = (double)p_tSensorMsgNet->signal_intensity;
-		
-		in_put_current.value.as_float 	= 500;
-		out_put_current.value.as_float 	= 500;
-		in_put_voltage.value.as_float 	= 220;
-//		out_put_voltage.value.as_float 	= 100;
-		in_put_freq.value.as_float 		= 50;
-		in_put_power_p.value.as_float 	= 100;
-		in_put_power_q.value.as_float 	= -10;
-		in_put_power_s.value.as_float 	= 110;
-		in_put_energy_p.value.as_float 	= 1000;
-		in_put_energy_q.value.as_float 	= 50;
-		in_put_energy_s.value.as_float 	= 1050;
-//		signal_intensity.value.as_float = ;
 	}
 }
 
 //从指定的NTP服务器获取时间
-time_t time_sss = 0;
 u8 SyncDataTimeFormBcxxModule(time_t sync_cycle)
 {
 	u8 ret = 0;
 	struct tm tm_time;
+	static time_t time_s = 0;
 	char buf[32];
 
-	if((GetSysTick1s() - time_sss >= sync_cycle))
+	if((GetSysTick1s() - time_s >= sync_cycle))
 	{
 		memset(buf,0,32);
 
@@ -488,11 +462,13 @@ u8 SyncDataTimeFormBcxxModule(time_t sync_cycle)
 			tm_time.tm_min = (buf[12] - 0x30) * 10 + buf[13] - 0x30;
 			tm_time.tm_sec = (buf[15] - 0x30) * 10 + buf[16] - 0x30;
 
-			time_sss = mktime(&tm_time);
+			time_s = mktime(&tm_time);
 
-			time_sss += 28800;
+			time_s += 28800;
 
-			SyncTimeFromNet(time_sss);
+			SyncTimeFromNet(time_s);
+
+			GetTimeOK = 1;
 
 			ret = 1;
 		}
@@ -551,37 +527,33 @@ void vTaskNET(void *pvParameters)
 			if(nbiot_time() - sync_csq_time >= 10)
 			{
 				sync_csq_time = nbiot_time();
-				
-				SignalIntensity = bcxx_get_csq();
-				
+
+				SignalIntensity = bcxx_get_AT_CSQ();
+
 				SyncDataTimeFormBcxxModule(3600);
 			}
 		}
-		
-		ret = nbiot_device_step( dev, -1);
+
+		ret = nbiot_device_step(dev, -1);
 
 		if ( ret )
 		{
 #ifdef DEBUG_LOG
 			printf( "device step error, code = %d.\r\n", ret );
 #endif
-//			if(ret != -12)
-//			{
-				unregister_all_things();
+			unregister_all_things();
 
-				goto RE_INIT_BCXX;
-//			}
+			goto RE_INIT_BCXX;
 		}
 		else
 		{
-			res_update(1200);
+			res_update(UpLoadINCL);
 		}
-		
+
 		sync_sensor_data();
-		
+
 		delay_ms(100);
 
-//		NET_Satck = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 

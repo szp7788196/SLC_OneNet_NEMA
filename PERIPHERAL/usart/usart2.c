@@ -12,15 +12,15 @@
 
 
 volatile char rsp_ok=0;
-struct ringbuf ring_fifo;
-struct ringbuf ring_fifo1;
+RingBuf ring_fifo;
+RingBuf ring_fifo1;
 uint8_t rx_fifo[512];
 uint8_t rx_fifo1[512];
 int8_t dl_buf_id=-1;
 
 FIFO(dl_buf,8,512);
 
-//#define UART_DMA 1
+#define UART_DMA 1
 #define MAX_RCV_LEN 512
 #ifdef UART_DMA
 #include "stm32f10x.h"
@@ -75,7 +75,7 @@ void USART2_Init(u32 bound)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
+//	NVIC_InitTypeDef NVIC_InitStructure;
 	
 #ifdef UART_DMA
 	DMA_InitTypeDef DMA_InitStructure;
@@ -107,11 +107,11 @@ void USART2_Init(u32 bound)
 	register_cmd_handler(USART2_Write,&ring_fifo1,&rsp_ok);
 
 	USART_Init(USART2, &USART_InitStructure);
-	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0 ;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+//	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0 ;
+//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitStructure);
 	
 #ifdef UART_DMA
 	//DMA1通道4配置
@@ -198,14 +198,6 @@ void USART2_IRQHandler(void)
 		else if((msg_p = (uint8_t *)strstr((const char *)ring_fifo.data, "+CEREG:1")) != NULL)
 		{
 //			RUN_LED = 0;
-		}
-		else if((msg_p = (uint8_t *)strstr((const char *)ring_fifo.data, "+CSQ:")) != NULL)
-		{
-			memcpy(cmd_rx_buff,ring_fifo.data,ringbuf_elements(&ring_fifo));
-		}
-		else if((msg_p = (uint8_t *)strstr((const char *)ring_fifo.data, "+CCLK:")) != NULL)
-		{
-			memcpy(cmd_rx_buff,ring_fifo.data,ringbuf_elements(&ring_fifo));
 		}
 		else
 		{
