@@ -219,12 +219,12 @@ void SetRegularTimeGroups(void)
 						RegularTimeGroupAdd(TYPE_WEEKDAY,tmp_time);
 					break;
 					
-					case TYPE_WEEKEND:
-						RegularTimeGroupAdd(TYPE_WEEKEND,tmp_time);
+					case TYPE_HOLIDAY_START:
+						RegularTimeGroupAdd(TYPE_HOLIDAY_START,tmp_time);
 					break;
 					
-					case TYPE_HOLIDAY:
-						RegularTimeGroupAdd(TYPE_HOLIDAY,tmp_time);
+					case TYPE_HOLIDAY_END:
+						RegularTimeGroupAdd(TYPE_HOLIDAY_END,tmp_time);
 					break;
 					
 					default:
@@ -234,7 +234,7 @@ void SetRegularTimeGroups(void)
 			}
 			else
 			{
-				RegularTimeGroupSub(group_num);
+				RemoveAllStrategy();
 			}
 			
 			for(i = 0; i < TIME_RULE_LEN; i ++)
